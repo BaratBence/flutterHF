@@ -1,6 +1,9 @@
-import 'package:f1calendarflutter/data/model/Weather.dart';
-import 'dart:math';
+import 'dart:convert';
 
+
+import 'package:f1calendarflutter/data/model/Weather.dart';
+import 'package:f1calendarflutter/data/network/NetworkResonse.dart';
+import 'package:http/http.dart' as http;
 
 abstract class WeatherRepository {
   Future<Weather> fetchWeather(String cityName);
@@ -8,27 +11,23 @@ abstract class WeatherRepository {
 
 class FakeWeatherRepository implements WeatherRepository {
   @override
-  Future<Weather> fetchWeather(String cityName) {
-    // Simulate network delay
-    return Future.delayed(
-      const Duration(seconds: 1),
-          () {
-        final random = Random();
-
-        // Simulate some network exception
-        if (random.nextBool()) {
-          throw NetworkException();
-        }
-
-        // Return "fetched" weather
-        return Weather(
+  Future<Weather> fetchWeather(String cityName) async {
+    final netRes = await http.get(Uri.parse('https://ergast.com/api/f1/2022/4.json'));
+    if(netRes.statusCode == 200) {
+      Response test = Response.fromJson(jsonDecode(netRes.body));
+      //print(test.produceRaceList()[0].name);
+      print(test.produceDetails().sessions[3].name);
+      return Weather(
           cityName: cityName,
           // Temperature between 20 and 35.99
-          temperatureCelsius: 20 + random.nextInt(15) + random.nextDouble(),
-          names: ["Tibor" , "Bence" , "Zoli", "Dénes"]
-        );
-      },
-    );
+          temperatureCelsius: 10,
+          names: ["Tibor" , "Bence" , "Zoli", "Dénes"],
+          res: Response.fromJson(jsonDecode(netRes.body))
+      );
+    }
+    else {
+      throw Exception('Failed to load album');
+    }
   }
 }
 
