@@ -32,7 +32,7 @@ class Response {
             locality: race.circuit.location.locality,
             raceName: race.raceName,
             circuitName: race.circuit.circuitName,
-            eventID: race.season.toString() + " season round " + race.round.toString() + " " + race.date!.substring(race.date!.length-2,race.date!.length),
+            eventID: race.season.toString() + " season round " + race.round.toString() + " " + race.date!.substring(race.date!.length-2,race.date!.length) + ":",
             first: first,
             second: second,
             third: third,
@@ -78,7 +78,6 @@ class RaceTable {
   }
 }
 
-//TODO:
 class Races {
   late String season;
   late String round;
@@ -136,7 +135,7 @@ class Races {
       return resultList;
     }
 
-    resultList.add(Session(name: "Race", date: date!.substring(date!.length-2, date!.length), time: "now"));
+    resultList.add(Session(name: "Race", date: date!.substring(date!.length-2, date!.length), time: time!.substring(0,2) + ":00-" + (int.parse(time!.substring(0,2))+2).toString() + ":00"));
     resultList.add(Session(name: "Qualifying", date: Qualifying!.date!.substring(Qualifying!.date!.length-2, Qualifying!.date!.length), time: Qualifying!.createSessionTime(1)));
     if(ThirdPractice?.time == null) {
       resultList.add(Session(name: "Sprint", date: Sprint!.date!.substring(Sprint!.date!.length-2, Sprint!.date!.length), time: Sprint!.createSessionTime(2)));
