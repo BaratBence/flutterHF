@@ -22,11 +22,13 @@ class _MainPageState extends State<MainPage> {
     racesBloc.add(GetRaces(loaded.toString()));
     loaded -= 100;
     scrollController.addListener(() {
-      if (scrollController.position.pixels >=
-              scrollController.position.maxScrollExtent &&
-          racesBloc.state is! RaceListSeason) {
+      if (scrollController.position.pixels >= scrollController.position.maxScrollExtent && racesBloc.state is! RaceListSeason && loaded!=0) {
         racesBloc.add(GetRaces(loaded.toString()));
-        loaded -= 100;
+        if(loaded-100 < 0) loaded = 0;
+        else loaded -= 100;
+      }
+      if(scrollController.position.pixels <= scrollController.position.minScrollExtent && racesBloc.state is! RaceListSeason) {
+          print("sasdasdasddas");
       }
     });
     super.initState();
