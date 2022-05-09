@@ -1,6 +1,9 @@
+import 'dart:ui';
+
 import 'package:f1calendarflutter/bloc/race/raceList_bloc.dart';
 import 'package:f1calendarflutter/data/model/model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -12,9 +15,14 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  final ScrollController scrollController = ScrollController();
+  final ScrollController scrollController = ScrollController(
+    initialScrollOffset: 0.0,
+    keepScrollOffset: false,
+  );
   List<RaceListItem> items = [];
   int loaded = 979;
+  double listEnd = 0;
+  bool initiated = false;
 
   @override
   void initState() {
@@ -22,13 +30,20 @@ class _MainPageState extends State<MainPage> {
     racesBloc.add(GetRaces(loaded.toString()));
     loaded -= 100;
     scrollController.addListener(() {
-      if (scrollController.position.pixels >= scrollController.position.maxScrollExtent && racesBloc.state is! RaceListSeason && loaded!=0) {
+      if (scrollController.position.pixels >=
+              scrollController.position.maxScrollExtent &&
+          racesBloc.state is! RaceListSeason &&
+          loaded != 0) {
         racesBloc.add(GetRaces(loaded.toString()));
-        if(loaded-100 < 0) loaded = 0;
-        else loaded -= 100;
+        if (loaded - 100 < 0)
+          loaded = 0;
+        else
+          loaded -= 100;
       }
-      if(scrollController.position.pixels <= scrollController.position.minScrollExtent && racesBloc.state is! RaceListSeason) {
-          print("sasdasdasddas");
+      if (scrollController.position.pixels <=
+              scrollController.position.minScrollExtent &&
+          racesBloc.state is! RaceListSeason) {
+        print("sasdasdasddas");
       }
     });
     super.initState();
@@ -66,6 +81,7 @@ class _MainPageState extends State<MainPage> {
             } else if (state is RaceListLoaded) {
               if (items.length < 99) items = [];
               items.addAll(state.races);
+              initiated = false;
               return buildLoaded(items);
             } else if (state is RaceListSeason) {
               items = [];
@@ -96,13 +112,26 @@ class _MainPageState extends State<MainPage> {
     return raceListView(races);
   }
 
+  void _scrollToEnd() {
+    if (scrollController.hasClients) {
+      scrollController.jumpTo(listEnd);
+      listEnd = scrollController.position.maxScrollExtent;
+    }
+  }
+
   Widget raceListView(List<RaceListItem> races) {
-    return Flexible(
+    Widget view = Flexible(
         child: ListView.builder(
             padding: const EdgeInsets.all(0),
             controller: scrollController,
             itemCount: races.length,
             itemBuilder: (BuildContext context, int index) {
+              SchedulerBinding.instance?.addPostFrameCallback((_) {
+                if(!initiated) {
+                  _scrollToEnd();
+                  initiated = true;
+                }
+              });
               return Padding(
                   padding: const EdgeInsets.all(5),
                   child: Card(
@@ -145,6 +174,9 @@ class _MainPageState extends State<MainPage> {
                     ),
                   )));
             }));
+    _scrollToEnd();
+
+    return view;
   }
 
   @override
@@ -162,7 +194,7 @@ class SeasonInputField extends StatelessWidget {
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         child: TextField(
-          onSubmitted: (value) => submitCityName(context, value),
+          onSubmitted: (value) => submitSeason(context, value),
           textInputAction: TextInputAction.search,
           decoration: InputDecoration(
               hintText: "Enter Season",
@@ -172,7 +204,7 @@ class SeasonInputField extends StatelessWidget {
         ));
   }
 
-  void submitCityName(BuildContext context, String season) {
+  void submitSeason(BuildContext context, String season) {
     int seasonInt = 0;
     if (season.isEmpty) {
       final racesBloc = BlocProvider.of<RaceListBloc>(context);

@@ -12,13 +12,6 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    /*return MaterialApp(
-      title: 'F1 Calendar',
-      home: BlocProvider(
-        create: (context) => WeatherBloc(FakeWeatherRepository()),
-        child: MainPage()
-      ),
-  */
     return MultiBlocProvider(
         providers: [
           BlocProvider(create: (context) => RaceListBloc(ConcreteRaceListRepository())),

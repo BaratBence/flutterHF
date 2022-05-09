@@ -15,3 +15,7 @@ class GetSeason extends RaceListEvent {
 
   final String season;
 }
+
+class ViewCreated extends RaceListEvent {
+  ViewCreated();
+}

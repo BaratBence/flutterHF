@@ -12,6 +12,10 @@ class RaceListLoading extends RaceListState {
   const RaceListLoading();
 }
 
+class RaceListViewCreated extends RaceListState {
+  const RaceListViewCreated();
+}
+
 class RaceListSeason extends RaceListState {
   final List<RaceListItem> races;
   const RaceListSeason(this.races);

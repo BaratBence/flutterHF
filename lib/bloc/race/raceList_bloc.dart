@@ -3,10 +3,6 @@ import 'package:f1calendarflutter/network/raceList_repository.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../data/network/NetworkResonse.dart';
-
-
-
 part '../race/raceList_event.dart';
 part 'raceList_state.dart';
 
@@ -34,6 +30,9 @@ class RaceListBloc extends Bloc<RaceListEvent, RaceListState> {
       } on NetworkException {
         yield const WeatherError("Couldn't fetch weather. Is the service online?");
       }
+    }
+    else if(event is ViewCreated) {
+      yield const RaceListViewCreated();
     }
   }
 
