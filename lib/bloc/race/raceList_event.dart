@@ -6,16 +6,11 @@ abstract class RaceListEvent {}
 
 class GetRaces extends RaceListEvent {
 
-  GetRaces(this.from);
-  final String from;
+  GetRaces();
 }
 
 class GetSeason extends RaceListEvent {
   GetSeason(this.season);
 
   final String season;
-}
-
-class ViewCreated extends RaceListEvent {
-  ViewCreated();
 }

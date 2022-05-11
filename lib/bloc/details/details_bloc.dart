@@ -27,7 +27,7 @@ class DetailsBloc extends Bloc<DetailsEvent, DetailsState> {
         cDetail.third = cResult.third;
         yield DetailsLoaded(cDetail);
       } on NetworkException {
-        yield const WeatherError("Couldn't fetch weather. Is the service online?");
+        yield const RaceError("Couldn't fetch weather. Is the service online?");
       }
     }
   }

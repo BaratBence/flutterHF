@@ -40,7 +40,7 @@ class _DetailsViewState extends State<DetailsView> {
         body: Column(children: <Widget>[
       BlocConsumer<DetailsBloc, DetailsState>(
         listener: (context, state) {
-          if (state is WeatherError) {
+          if (state is RaceError) {
             Scaffold.of(context).showSnackBar(SnackBar(
               content: Text(state.message),
             ));

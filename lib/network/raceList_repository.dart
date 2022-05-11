@@ -11,6 +11,8 @@ abstract class RaceListRepository {
 }
 
 class ConcreteRaceListRepository implements RaceListRepository {
+
+
   @override
   Future<Response> fetchRaces(String from) async {
     final netRes = await http.get(Uri.parse('https://ergast.com/api/f1.json?limit=' + 100.toString() + '&offset=' + from));

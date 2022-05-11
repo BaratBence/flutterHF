@@ -27,15 +27,15 @@ class DetailsLoaded extends DetailsState {
   int get hashCode => race.hashCode;
 }
 
-class WeatherError extends DetailsState {
+class RaceError extends DetailsState {
   final String message;
-  const WeatherError(this.message);
+  const RaceError(this.message);
 
   @override
   bool operator ==(Object o) {
     if (identical(this, o)) return true;
 
-    return o is WeatherError && o.message == message;
+    return o is RaceError && o.message == message;
   }
 
   @override

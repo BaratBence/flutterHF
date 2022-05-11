@@ -8,6 +8,9 @@ part 'raceList_state.dart';
 
 class RaceListBloc extends Bloc<RaceListEvent, RaceListState> {
   final RaceListRepository _raceListRepository;
+  List<RaceListItem> items = [];
+  int loaded = 979;
+  bool season = false;
 
   RaceListBloc(this._raceListRepository): super(const RaceListInitial());
 
@@ -16,23 +19,34 @@ class RaceListBloc extends Bloc<RaceListEvent, RaceListState> {
     if(event is GetRaces) {
       try {
         yield const RaceListLoading();
-        final races = await _raceListRepository.fetchRaces(event.from);
-        yield RaceListLoaded(races.produceRaceList().reversed.toList());
+        if(loaded != 0) {
+          final races = await _raceListRepository.fetchRaces(loaded.toString());
+          if(season) {
+            items = [];
+            items.addAll(races.produceRaceList().reversed.toList());
+          }
+          else items.addAll(races.produceRaceList().reversed.toList());
+          if (loaded - 100 < 0) loaded = 0;
+          else loaded -= 100;
+          yield RaceListLoaded(items);
+        } else {
+          yield RaceListLoaded(items);
+        }
       } on NetworkException {
-        yield const WeatherError("Couldn't fetch weather. Is the service online?");
+        yield const RaceListError("Couldn't fetch raceList. Is the service online?");
       }
     }
     else if(event is GetSeason) {
       try {
         yield const RaceListLoading();
         final races = await _raceListRepository.fetchSeason(event.season);
-        yield RaceListSeason(races.produceRaceList().reversed.toList());
+        items = races.produceRaceList();
+        season = true;
+        loaded = 979;
+        yield RaceListSeason(items.reversed.toList());
       } on NetworkException {
-        yield const WeatherError("Couldn't fetch weather. Is the service online?");
+        yield const RaceListError("Couldn't fetch raceList. Is the service online?");
       }
-    }
-    else if(event is ViewCreated) {
-      yield const RaceListViewCreated();
     }
   }
 

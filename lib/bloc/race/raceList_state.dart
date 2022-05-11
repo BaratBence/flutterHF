@@ -12,10 +12,6 @@ class RaceListLoading extends RaceListState {
   const RaceListLoading();
 }
 
-class RaceListViewCreated extends RaceListState {
-  const RaceListViewCreated();
-}
-
 class RaceListSeason extends RaceListState {
   final List<RaceListItem> races;
   const RaceListSeason(this.races);
@@ -46,15 +42,15 @@ class RaceListLoaded extends RaceListState {
   int get hashCode => races.hashCode;
 }
 
-class WeatherError extends RaceListState {
+class RaceListError extends RaceListState {
   final String message;
-  const WeatherError(this.message);
+  const RaceListError(this.message);
 
   @override
   bool operator ==(Object o) {
     if (identical(this, o)) return true;
 
-    return o is WeatherError && o.message == message;
+    return o is RaceListError && o.message == message;
   }
 
   @override

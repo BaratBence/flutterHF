@@ -1,4 +1,3 @@
-import 'dart:ui';
 
 import 'package:f1calendarflutter/bloc/race/raceList_bloc.dart';
 import 'package:f1calendarflutter/data/model/model.dart';
@@ -15,38 +14,31 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  final ScrollController scrollController = ScrollController(
-    initialScrollOffset: 0.0,
-    keepScrollOffset: false,
-  );
-  List<RaceListItem> items = [];
-  int loaded = 979;
+  late RaceListBloc racesBloc;
+  late ScrollController scrollController;
+
+
   double listEnd = 0;
   bool initiated = false;
 
   @override
   void initState() {
-    final racesBloc = BlocProvider.of<RaceListBloc>(context);
-    racesBloc.add(GetRaces(loaded.toString()));
-    loaded -= 100;
+    racesBloc = BlocProvider.of<RaceListBloc>(context);
+    racesBloc.add(GetRaces());
+
+    super.initState();
+  }
+
+  ScrollController initializeScroller(double listPosition) {
+    scrollController = ScrollController(initialScrollOffset: listPosition, keepScrollOffset: true,);
     scrollController.addListener(() {
-      if (scrollController.position.pixels >=
-              scrollController.position.maxScrollExtent &&
-          racesBloc.state is! RaceListSeason &&
-          loaded != 0) {
-        racesBloc.add(GetRaces(loaded.toString()));
-        if (loaded - 100 < 0)
-          loaded = 0;
-        else
-          loaded -= 100;
-      }
-      if (scrollController.position.pixels <=
-              scrollController.position.minScrollExtent &&
-          racesBloc.state is! RaceListSeason) {
-        print("sasdasdasddas");
+      if(scrollController.hasClients) {
+        if (scrollController.position.pixels >= scrollController.position.maxScrollExtent && racesBloc.state is! RaceListSeason) {
+          racesBloc.add(GetRaces());
+        }
       }
     });
-    super.initState();
+    return scrollController;
   }
 
   @override
@@ -61,34 +53,30 @@ class _MainPageState extends State<MainPage> {
             ),
             child: const SizedBox(
               child: Center(
-                  child: Text('Races',
-                      style: TextStyle(fontSize: 40, color: Colors.white))),
+                  child: Text('Races', style: TextStyle(fontSize: 40, color: Colors.white))),
             )),
         const SeasonInputField(),
         BlocConsumer<RaceListBloc, RaceListState>(
           listener: (context, state) {
-            if (state is WeatherError) {
+            if (state is RaceListError) {
               Scaffold.of(context).showSnackBar(SnackBar(
                 content: Text(state.message),
               ));
             }
           },
           builder: (context, state) {
-            if (state is RaceListInitial) {
-              return buildInitialInput();
-            } else if (state is RaceListLoading) {
+            if (state is RaceListLoading) {
               return buildLoading();
             } else if (state is RaceListLoaded) {
-              if (items.length < 99) items = [];
-              items.addAll(state.races);
               initiated = false;
-              return buildLoaded(items);
+              scrollController = initializeScroller(listEnd);
+              return buildLoaded(state.races);
             } else if (state is RaceListSeason) {
-              items = [];
-              items.addAll(state.races);
-              return buildLoaded(items);
+              listEnd = 0;
+              scrollController = initializeScroller(listEnd);
+              return buildLoaded(state.races);
             } else {
-              return buildInitialInput();
+              return buildLoading();
             }
           },
         ),
@@ -102,22 +90,14 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  Widget buildInitialInput() {
-    return const Center(
-      child: CircularProgressIndicator(),
-    );
-  }
-
   Widget buildLoaded(List<RaceListItem> races) {
     return raceListView(races);
   }
 
-  void _scrollToEnd() {
-    if (scrollController.hasClients) {
-      scrollController.jumpTo(listEnd);
-      listEnd = scrollController.position.maxScrollExtent;
-    }
+  void updateListEnd(){
+    listEnd = scrollController.position.maxScrollExtent;
   }
+  
 
   Widget raceListView(List<RaceListItem> races) {
     Widget view = Flexible(
@@ -128,7 +108,7 @@ class _MainPageState extends State<MainPage> {
             itemBuilder: (BuildContext context, int index) {
               SchedulerBinding.instance?.addPostFrameCallback((_) {
                 if(!initiated) {
-                  _scrollToEnd();
+                  updateListEnd();
                   initiated = true;
                 }
               });
@@ -136,8 +116,8 @@ class _MainPageState extends State<MainPage> {
                   padding: const EdgeInsets.all(5),
                   child: Card(
                       child: SizedBox(
-                    height: 50,
-                    child: Table(
+                      height: 50,
+                      child: Table(
                       columnWidths: const <int, TableColumnWidth>{
                         0: FlexColumnWidth(),
                         1: FixedColumnWidth(100)
@@ -174,8 +154,6 @@ class _MainPageState extends State<MainPage> {
                     ),
                   )));
             }));
-    _scrollToEnd();
-
     return view;
   }
 
@@ -208,7 +186,7 @@ class SeasonInputField extends StatelessWidget {
     int seasonInt = 0;
     if (season.isEmpty) {
       final racesBloc = BlocProvider.of<RaceListBloc>(context);
-      racesBloc.add(GetRaces(979.toString()));
+      racesBloc.add(GetRaces());
     } else {
       try {
         seasonInt = int.parse(season);
