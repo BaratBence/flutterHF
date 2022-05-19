@@ -24,8 +24,8 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     racesBloc = BlocProvider.of<RaceListBloc>(context);
+    racesBloc.add(InitList());
     racesBloc.add(GetRaces());
-
     super.initState();
   }
 

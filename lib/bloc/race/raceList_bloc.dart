@@ -24,6 +24,7 @@ class RaceListBloc extends Bloc<RaceListEvent, RaceListState> {
           if(season) {
             items = [];
             items.addAll(races.produceRaceList().reversed.toList());
+            season = false;
           }
           else items.addAll(races.produceRaceList().reversed.toList());
           if (loaded - 100 < 0) loaded = 0;
@@ -47,6 +48,12 @@ class RaceListBloc extends Bloc<RaceListEvent, RaceListState> {
       } on NetworkException {
         yield const RaceListError("Couldn't fetch raceList. Is the service online?");
       }
+    }
+    else if(event is InitList) {
+      yield const RaceListInitial();
+          season =false;
+          loaded = 979;
+          items =[];
     }
   }
 

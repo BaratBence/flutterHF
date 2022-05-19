@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:f1calendarflutter/data/network/NetworkResonse.dart';
 import 'package:http/http.dart' as http;
 
-import '../data/model/model.dart';
 
 abstract class RaceListRepository {
   Future<Response> fetchRaces(String from);
